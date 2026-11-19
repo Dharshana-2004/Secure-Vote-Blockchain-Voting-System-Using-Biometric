@@ -1,0 +1,148 @@
+/* ====== Tokens ====== */
+
+
+@import url('https://fonts.googleapis.com/css2?family=Dosis:wght@300&family=Maven+Pro&family=Oxygen&family=Saira:wght@300&family=Square+Peg&display=swap');
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Oxygen', sans-serif;
+  
+}
+ :root{
+ --indigo-700:#434BD9;
+ --indigo-600:#3B6FD9;
+ --blue-500:#2C7BBF;
+ --teal-400:#21A2BF;
+ --mint-400:#0FBF9F;
+
+ --text:#eaf3ff;
+ --muted:#c9ddff;
+
+ --radius-2xl:18px;
+ --glass-bg:rgba(255,255,255,.12);
+ --glass-brd:rgba(255,255,255,.28);
+ --shadow-lg:0 12px 30px rgba(0,0,0,.25);
+
+ --ease: cubic-bezier(.4,0,.2,1);
+ }
+
+/* ====== Page background ====== */
+ body.home {
+ min-height: 100vh;
+ margin: 0;
+ color: var(--text);
+ /* Deep blue → teal gradient that matches your screenshots */
+ background:
+ radial-gradient(1200px 700px at 80% 10%, rgba(255,255,255,.08), transparent 60%),
+ linear-gradient(135deg, var(--indigo-700) 0%, var(--indigo-600) 35%, var(--blue-500) 60%, var(--teal-400) 85%);
+ background-attachment: fixed;
+ font-family: "Poppins", system-ui, -apple-system, Segoe UI, sans-serif;
+ }
+
+/* ====== Reusable glass ====== */
+ .glass {
+ background: var(--glass-bg);
+ border: 1px solid var(--glass-brd);
+ backdrop-filter: blur(14px);
+ -webkit-backdrop-filter: blur(14px);
+ box-shadow: var(--shadow-lg);
+ }
+
+/* ====== Pill navbar ====== */
+ .navbar {
+ position: sticky; /* stays at top while scrolling */
+ top: 20px;
+ margin: 20px auto;
+ width: min(980px, 92%);
+ display: flex;
+ gap: 8px;
+ align-items: center;
+ justify-content: space-between;
+ padding: 10px 14px;
+ border-radius: 999px; /* pill shape */
+ }
+ .nav-left, .nav-right { display: flex; gap: 6px; align-items: center; }
+
+.nav-logo {
+ display: inline-flex; gap: 10px; align-items: center;
+ padding: 8px 12px; border-radius: 999px; font-weight: 600;
+ }
+ .badge {
+ padding: 6px 10px; border-radius: 999px; font-size: .8rem;
+ color: #05222a; background: rgba(255,255,255,.85);
+ }
+
+.nav-btn {
+ border: 0; color: white; cursor: pointer; font-weight: 600;
+ padding: 10px 16px; border-radius: 999px;
+ background: linear-gradient(90deg, var(--teal-400), var(--mint-400));
+ transition: transform .15s var(--ease), box-shadow .15s var(--ease), opacity .15s var(--ease);
+ }
+ .nav-btn.secondary {
+ background: linear-gradient(90deg, var(--indigo-600), var(--blue-500));
+ }
+ .nav-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(6, 182, 212, .35); }
+ .nav-btn:active { transform: translateY(0); opacity: .9; }
+
+/* ====== Page container ====== */
+ .container {
+ width: min(1100px, 92%);
+ margin: 28px auto 60px;
+ }
+
+/* ====== Section header ====== */
+ .section-head {
+ display: flex; justify-content: space-between; align-items: end;
+ margin: 14px 6px 18px;
+ }
+ .section-head h2 {
+ margin: 0; font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+ color: #f6fbff; letter-spacing: .2px;
+ }
+ .section-head p { margin: 4px 0 0; color: var(--muted); }
+
+/* ====== Elections grid (cards) ====== */
+ .elections {
+ display: grid;
+ grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+ gap: 18px;
+ }
+
+.card {
+ position: relative;
+ border-radius: var(--radius-2xl);
+ overflow: hidden;
+ padding: 18px 18px 14px;
+ }
+ .card::before{ /* subtle inner shine */
+ content:"";
+ position:absolute; inset:0;
+ background: radial-gradient(600px 220px at -10% -20%, rgba(255,255,255,.18), transparent 40%);
+ pointer-events:none;
+ }
+ .card .meta { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+ .tag {
+ font-size:.75rem; color:#073a49; padding:4px 8px; border-radius:999px;
+ background: rgba(255,255,255,.85);
+ }
+ .title { font-weight:700; margin: 4px 0 6px; }
+ .subtitle { color: var(--muted); font-size:.9rem; margin:0 0 14px; }
+
+/* vote/action row */
+ .actions { display:flex; gap:10px; align-items:center; }
+ .btn {
+ border:0; padding:10px 14px; border-radius:12px; font-weight:600; color:white;
+ background: linear-gradient(90deg, var(--indigo-600), var(--blue-500));
+ transition: transform .15s var(--ease), box-shadow .15s var(--ease);
+ }
+ .btn:hover{ transform: translateY(-2px); box-shadow: 0 12px 22px rgba(59,111,217,.35); }
+ .btn.alt{ background: linear-gradient(90deg, var(--teal-400), var(--mint-400)); }
+
+/* subtle entrance */
+ .card { animation: fadeUp .45s var(--ease) both; }
+ @keyframes fadeUp{
+ from{ opacity:0; transform: translateY(8px); }
+ to{ opacity:1; transform: translateY(0);}
+ }
+

@@ -1,0 +1,118 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ election.name }} – eVote</title>
+  <link rel="stylesheet" href="{% static 'css/electiondetail.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" defer></script>
+  <script src="{% static 'js/facecheck.js'%}" defer></script>
+</head>
+
+<body class="home">
+  <!-- Navbar -->
+ <nav class="navbar glass">
+ <div class="nav-left">
+ <div class="nav-logo">
+ 
+ <a href="/electionlist" class="nav-btn">Active Elections</a>
+ <a href="/results" class="nav-btn">Election Results</a>
+ <a href="/changepassword" class="nav-btn">Change Password</a>
+ 
+ </div>
+ </div>
+ <div class="nav-right">
+ <form action="{% url 'signout'%}" method = "post" style="display:inline;">
+  {%csrf_token%}
+ <button type="submit" class="signout-btn">Sign out</button>
+ </form>
+ </div>
+ </nav>
+  <!-- Layout -->
+  <main class="container detail-layout">
+    <!-- Left card -->
+    <section class="election-panel glass">
+      <span class="tag">{{ election.scope|default:"Public" }}</span>
+      <h2>{{ election.name }}</h2>
+      <p class="muted">
+        {% if election.ends_at %}
+          Closes {{ election.ends_at|date:"M j, Y – H:i" }}
+        {% endif %}
+        · {{ election.candidates.count }} candidates
+      </p>
+      <p class="desc">{{ election.description|default:"Cast your vote securely." }}</p>
+
+      <!-- Camera -->
+      <div class="camera-wrap glass">
+        <video id="cameraVideo" autoplay playsinline muted></video>
+        <div id="faceStatus" class="status-pill">Starting camera...</div>
+      </div>
+    </section>
+
+    <!-- Right: candidates -->
+    <section class="candidate-grid">
+      {% for c in candidates %}
+      <article class="candidate-card glass card">
+        {% if c.image %}
+          <img src="{{ c.image.url }}" alt="{{ c.candidatename }}" class="avatar">
+        {% else %}
+          <img src="{% static 'img/placeholder-avatar.png' %}" alt="{{ c.candidatename }}" class="avatar">
+        {% endif %}
+        <h3 class="candidate-name">{{ c.candidatename }}</h3>
+        <form class="vote-form" action="votecandidate" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="pid" value="{{ c.id }}">
+          <button type="submit" class="btn vote-btn" disabled>Vote</button>
+        </form>
+      </article>
+      {% endfor %}
+    </section>
+  </main>
+
+  <!-- Success modal -->
+  <div id="voteSuccess" class="modal">
+    <div class="modal-card glass">
+      <div class="modal-icon check">
+        <svg class="checkmark" viewBox="0 0 52 52">
+          <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+          <path class="checkmark__check" fill="none" d="M14 27l7 7 17-17"/>
+        </svg>
+      </div>
+      <h3>Vote recorded</h3>
+      <p>Your vote has been recorded successfully.</p>
+      <div class="modal-actions">
+        <a href="{% url 'electionlist' %}" class="btn alt">Back to elections</a>
+      </div>
+    </div>
+  </div>
+  <!-- ✅ Warning modal for multiple faces -->
+<div id="multiFaceModal" class="modal">
+  <div class="modal-card glass">
+    <div class="modal-icon cross">
+      <svg class="xmark" viewBox="0 0 52 52">
+        <path class="x1" d="M16 16 L36 36"/>
+        <path class="x2" d="M36 16 L16 36"/>
+      </svg>
+    </div>
+    <h3>Multiple faces detected</h3>
+    <p>Voting is disabled while more than one person is in the frame.</p>
+    <div class="modal-actions">
+      <button id="understand" class="btn">OK</button>
+      <form id="logoutForm" action="{% url 'signout' %}" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button id="logoutNow" class="btn danger" type="submit">Signout now</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+  <script>
+    window.EV_CONFIG = {
+      voteUrl: "{% url 'votecandidate' %}",
+      listUrl: "{% url 'electionlist' %}"
+    };
+  </script>
+  <script src="{% static 'js/facecheck.js' %}" defer></script>
+</body>
+</html>

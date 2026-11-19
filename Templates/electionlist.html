@@ -1,0 +1,110 @@
+{% load static %}
+ <!doctype html>
+ <html lang="en">
+ <head>
+ <meta charset="utf-8">
+ <title>Election List</title>
+ <link rel="stylesheet" href="{% static 'css/electionlist.css' %}">
+ </head>
+ <body class="home">
+
+ <!-- Pill Navbar (unchanged) -->
+  <nav class="navbar glass">
+ <div class="nav-left">
+ <div class="nav-logo">
+ 
+ <a href="/electionlist" class="nav-btn">Active Elections</a>
+ <a href="/results" class="nav-btn">Election Results</a>
+ <a href="/changepassword" class="nav-btn">Change Password</a>
+ 
+ </div>
+ </div>
+ <div class="nav-right">
+ <form action="{% url 'signout'%}" method = "post" style="display:inline;">
+  {%csrf_token%}
+ <button type="submit" class="signout-btn">Sign out</button>
+ </form>
+ </div>
+ </nav>
+
+ {% if messages %}
+  <div class="messages">
+    {% for message in messages %}
+      <div class="alert {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+ <!-- Content -->
+ <main class="container">
+ <div class="section-head">
+ <div>
+ <h2>Ongoing elections</h2>
+ <p>Cast your vote securely on the blockchain.</p>
+ </div>
+ </div>
+
+ <section class="elections">
+ {% for election in elections %}
+ <article class="card glass">
+ <div class="meta">
+ <span class="tag">{{ election.scope|default:"Public" }}</span>
+ </div>
+
+ <h3 class="title">{{ election.name }}</h3>
+
+ <p class="subtitle">
+ {% if election.ends_at %}
+ Closes in {{ election.ends_at|timeuntil }}
+ {% else %}
+ Open
+ {% endif %}
+ · {{ election.num_candidates }} candidates
+ </p>
+
+ <div class="actions">
+ <a href="{% url 'electiondetail' election.id %}" class="btn">Vote now</a>
+ <a href="#detail-{{ election.id }}" class="btn alt">Details</a>
+ </div>
+ </article>
+ {% empty %}
+ <article class="card glass">
+ <p class="subtitle">No elections available right now. Please come back once the elections go Live.</p>
+ </article>
+ {% endfor %}
+ </section>
+ </main>
+
+ {# Per-election centered modal (pure CSS :target) #}
+ {% for election in elections %}
+ <div id="detail-{{ election.id }}" class="modal">
+ <div class="modal-card glass">
+ <div class="modal-head">
+ <span class="tag">{{ election.scope|default:"Public" }}</span>
+ <h3 class="modal-title">{{ election.name }}</h3>
+ </div>
+ <p class="modal-sub">
+ {% if election.description %}{{ election.description }}{% else %}No description provided.{% endif %}
+ </p>
+ <ul class="modal-meta">
+ <li>
+ {% if election.ends_at %}
+ Closes in <strong>{{ election.ends_at|timeuntil }}</strong>
+ <span class="muted"> ({{ election.ends_at|date:"M j, Y — H:i" }})</span>
+ {% else %}
+ <strong>Open</strong>
+ {% endif %}
+ </li>
+ <li>Candidates <strong>{{ election.candidates_count }}</strong></li>
+ </ul>
+
+ <div class="modal-actions">
+ <a href="{% url 'electiondetail' election.id %}" class="btn alt">Open election</a>
+ <a href="#" class="btn">Close</a>
+ </div>
+ </div>
+ </div>
+ {% endfor %}
+
+</body>
+ </html>

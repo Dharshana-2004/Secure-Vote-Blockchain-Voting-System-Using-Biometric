@@ -1,0 +1,201 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>{{ election.name }} – Results | eVote</title>
+
+  {# Reuse your base styles #}
+  <link rel="stylesheet" href="{% static 'css/electiondetail.css' %}">
+  {# Minimal add-ons just for results #}
+  <link rel="stylesheet" href="{% static 'css/results.css' %}">
+
+  <script defer src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+</head>
+
+<body class="home">
+  <!-- ===== Navbar (as requested, same classes) ===== -->
+   <nav class="navbar glass">
+ <div class="nav-left">
+ <div class="nav-logo">
+ 
+ <a href="/electionlist" class="nav-btn">Active Elections</a>
+ <a href="/results" class="nav-btn">Election Results</a>
+ <a href="/changepassword" class="nav-btn">Change Password</a>
+ 
+ </div>
+ </div>
+ <div class="nav-right">
+ <form action="{% url 'signout'%}" method = "post" style="display:inline;">
+  {%csrf_token%}
+ <button type="submit" class="signout-btn">Sign out</button>
+ </form>
+ </div>
+ </nav> 
+  <!-- ===== Content ===== -->
+  <main class="container detail-layout" style="margin-top: var(--nav-top);">
+    <!-- Left: election summary (sticky glass card) -->
+    <aside class="election-panel glass" style="position:sticky; top:var(--sticky-offset);">
+      <div class="panel">
+        <header class="panel-head">
+          <h2 class="panel-title">{{ election.name }}</h2>
+          <span class="status_pill status_ok">Live</span>
+        </header>
+
+        <section class="panel-body">
+          <p class="desc">{{ election.description|default:"Live results" }}</p>
+          <div class="stats-grid">
+            <div class="stat glass-mini">
+              <div class="stat-label">Total Votes</div>
+              <div class="stat-value">{{ totals.total_votes }}</div>
+            </div>
+            <div class="stat glass-mini">
+              <div class="stat-label">Registered</div>
+              <div class="stat-value">{{ totals.registered|default:"—" }}</div>
+            </div>
+            <div class="stat glass-mini">
+              <div class="stat-label">Turnout</div>
+              <div class="stat-value">
+                {{ totals.turnout_percent|default:"0" }}%
+              </div>
+            </div>
+            <div class="stat glass-mini">
+              <div class="stat-label">Ends</div>
+              <div class="stat-value" id="ends-at"
+                   data-ends="{{ election.ends_at|date:'c' }}">
+                   {{ election.ends_at|date:"M j, g:i a" }}
+              </div>
+            </div>
+          </div>
+
+          {% if leader %}
+          <div class="leader glass-mini">
+            <img class="avatar" src="{{ leader.candidate.image_url }}" alt="{{ leader.candidate.candidatename }}">
+            <div>
+              <div class="leader-label">Current Leader</div>
+              <div class="leader-name">{{ leader.candidate.candidatename }}</div>
+            </div>
+            <span class="leader-badge status_pill status_ok">Leading</span>
+          </div>
+          {% endif %}
+        </section>
+
+        <footer class="panel-foot">
+          <small>Auto-refreshing every <span id="refresh-interval">10</span>s</small>
+        </footer>
+      </div>
+    </aside>
+
+    <!-- Right: results list -->
+    <section class="results-area">
+      <div class="panel">
+        <header class="panel-head">
+          <h3 class="panel-title">Candidate Results</h3>
+        </header>
+
+        <div class="panel-body">
+          <ul class="results-list">
+            {% for r in results %}
+            <li class="result-row glass" data-cid="{{ r.candidate.id }}">
+              <div class="row-main">
+                <img class="avatar" src="{{ r.candidate.image_url }}"
+                     alt="{{ r.candidate.candidatename }}" />
+                <div class="meta">
+                  <div class="name">{{ r.candidate.candidatename }}</div>
+                  <div class="bar progress" aria-label="Votes">
+                    <div class="progress-fill"
+                         style="width: {{ r.percent }}%;"
+                         data-percent="{{ r.percent|floatformat:2 }}"></div>
+                  </div>
+                </div>
+                <div class="figures">
+                  <div class="percent">{{ r.percent|floatformat:1 }}%</div>
+                  <div class="votes">{{ r.votes }} votes</div>
+                </div>
+              </div>
+
+              {% if r.is_leader %}
+                <span class="status_pill status_ok">Leading</span>
+              {% elif r.is_tied %}
+                <span class="status_pill">Tied</span>
+              {% endif %}
+            </li>
+            {% empty %}
+            <li class="glass" style="padding:16px;">No votes yet.</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Minimal JS: animate bars + (optional) polling ===== -->
+  <script>
+    // Animate bars on load
+    document.querySelectorAll('.progress-fill').forEach(el => {
+      const p = parseFloat(el.dataset.percent || el.style.width);
+      el.style.setProperty('--w', p + '%');
+      // trigger transition
+      requestAnimationFrame(() => el.classList.add('in'));
+    });
+
+    // Countdown text (optional)
+    const ends = document.getElementById('ends-at');
+    if (ends && ends.dataset.ends) {
+      const target = dayjs(ends.dataset.ends);
+      const tick = () => {
+        const now = dayjs();
+        const diff = target.diff(now);
+        if (diff <= 0) {
+          ends.textContent = 'Finished';
+          return;
+        }
+        const m = Math.floor(diff / 60000) % 60;
+        const h = Math.floor(diff / 3600000);
+        ends.textContent = ${h}h ${m}m;
+        setTimeout(tick, 15000);
+      };
+      tick();
+    }
+
+    // Optional polling (provide JSON endpoint in context as results_api_url)
+    {% if results_api_url %}
+    const REFRESH_EVERY = 10000; // 10s
+    document.getElementById('refresh-interval').textContent = REFRESH_EVERY/1000;
+    setInterval(async () => {
+      try {
+        const resp = await fetch('{{ results_api_url }}', {headers: {'Accept':'application/json'}});
+        if (!resp.ok) return;
+        const data = await resp.json();
+        // Expect: { totals:{...}, results:[{id,percent,votes,is_leader,is_tied}, ...], leader:{...} }
+        (data.results || []).forEach(r => {
+          const row = document.querySelector(.result-row[data-cid="${r.id}"]);
+          if (!row) return;
+          const fill = row.querySelector('.progress-fill');
+          const pct  = row.querySelector('.percent');
+          const vts  = row.querySelector('.votes');
+          fill.dataset.percent = r.percent;
+          fill.style.width = r.percent + '%';
+          pct.textContent = r.percent.toFixed(1) + '%';
+          vts.textContent = r.votes + ' votes';
+
+          // badges
+          row.querySelectorAll('.status_pill').forEach(b => b.remove());
+          if (r.is_leader) {
+            const b = document.createElement('span');
+            b.className = 'status_pill status_ok';
+            b.textContent = 'Leading';
+            row.appendChild(b);
+          } else if (r.is_tied) {
+            const b = document.createElement('span');
+            b.className = 'status_pill';
+            b.textContent = 'Tied';
+            row.appendChild(b);
+          }
+        });
+      } catch(e){ /* ignore network hiccups */ }
+    }, REFRESH_EVERY);
+    {% endif %}
+  </script>
+</body>
+</html>

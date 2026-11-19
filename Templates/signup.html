@@ -1,0 +1,93 @@
+<!DOCTYPE>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        {% load static %}
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{%static 'css/signup.css' %}">
+    </head>
+    <body style="background-image:url('{%static 'sigupback.png' %}');">
+        <div class="lefttext">
+            <p>Make yourself familiar with us!</p>
+        </div>
+    <div class="center">
+        <h3>Register Here</h3>
+        <center style="color:#21304a;">{% for message in messages %}
+        <b><i>{{message}}</i></b>
+        {% endfor %}</center>
+        <form action="{% url 'signup' %}" method="POST" id="signupForm" novalidate>
+            {% csrf_token %}
+            <div class="txt_field">
+                <input type="text" id="username" name="username" required autocomplete="username">
+                <span></span>
+                <label for="">Username</label>
+            </div>
+            <div class="txt_field">
+                <input type="text" id="full_name" name="full_name" required autocomplete="name">
+                <span></span>
+                <label for="">Full name</label>
+            </div>
+            <div class="txt_field">
+                <input type="email" id="email" name="email" required autocomplete="email">
+                <span></span>
+                <label for="">Email</label>
+            </div>
+            <div class="txt_field">
+                <input type="date" id="date_of_birth" name="date_of_birth" required>
+                <span></span>
+                <label for="">Date of Birth</label>
+            </div>
+            <div class="txt_field">
+                <input type="password" id="pass1" name="pass1" required autocomplete="new-password">
+                <span></span>
+                <label for="">Password</label>
+            </div>
+            <div class="txt_field">
+                <input type="password" id="pass2" name="pass2" required autocomplete="new-password">
+                <span></span>
+                <label for="">Confirm your Password</label>
+            </div>
+            <input type="hidden" id="face_snapshot" name="face_snapshot">
+
+            <div class="face-card" id="signupFaceCard">
+                <div class="face-card__header">
+                    <h4>Facial Enrollment</h4>
+                    <p class="face-card__status" id="signupFaceStatus">Start the camera to capture the voter's face.</p>
+                </div>
+                <div class="face-card__body">
+                    <video id="signupFaceVideo" autoplay playsinline muted></video>
+                    <canvas id="signupFaceCanvas" hidden></canvas>
+                    <img id="signupFacePreview" alt="Face preview" hidden>
+                </div>
+                <div class="face-card__actions">
+                    <button type="button" class="face-btn" id="signupFaceStart">Start Camera</button>
+                    <button type="button" class="face-btn face-btn--capture" id="signupFaceCapture" disabled>Capture Face</button>
+                    <button type="button" class="face-btn face-btn--ghost" id="signupFaceRetake" hidden>Retake</button>
+                </div>
+            </div>
+            
+            <button type="submit" id="signupSubmit" class="submit-button" disabled>Create Voter Account</button>
+        </form>
+    </div>
+    <script src="{% static 'js/face.js' %}"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        window.initFaceEnrollment({
+          cardSelector: '#signupFaceCard',
+          statusSelector: '#signupFaceStatus',
+          startButtonSelector: '#signupFaceStart',
+          captureButtonSelector: '#signupFaceCapture',
+          retakeButtonSelector: '#signupFaceRetake',
+          videoSelector: '#signupFaceVideo',
+          canvasSelector: '#signupFaceCanvas',
+          previewSelector: '#signupFacePreview',
+          snapshotFieldSelector: '#face_snapshot',
+          submitButtonSelector: '#signupSubmit',
+        });
+      });
+    </script>
+    </body>
+</html>

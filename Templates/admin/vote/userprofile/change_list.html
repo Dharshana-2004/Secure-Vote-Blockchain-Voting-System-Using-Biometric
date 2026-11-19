@@ -1,0 +1,13 @@
+{% extends "admin/change_list.html" %}
+
+{% block object-tools-items %}
+  {% if signup_url %}
+    <li>
+      <a href="{{ signup_url }}" class="addlink" target="_blank" rel="noopener">
+        Register new voter
+      </a>
+    </li>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}
+

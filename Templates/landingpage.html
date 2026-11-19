@@ -1,0 +1,57 @@
+
+ <!doctype html>
+ <html lang="en">
+ <head>
+ <meta charset="utf-8">
+ <title>Home</title>
+ {% load static %}
+ <link rel="stylesheet" href="{% static 'css/landingpage.css' %}">
+ </head>
+ <body class="home">
+
+ <!-- Pill Navbar -->
+ <nav class="navbar glass">
+ <div class="nav-left">
+ <div class="nav-logo">
+ 
+ <a href="/electionlist" class="nav-btn">Active Elections</a>
+ <a href="/results" class="nav-btn">Election Results</a>
+ <a href="/changepassword" class="nav-btn">Change Password</a>
+ 
+ </div>
+ </div>
+ <div class="nav-right">
+ <form action="{% url 'signout'%}" method = "post" style="display:inline;">
+  {%csrf_token%}
+ <button type="submit" class="signout-btn">Sign out</button>
+ </form>
+ </div>
+ </nav>
+
+
+ <article class="card glass">
+ <div class="meta">
+ <p class="heading">Blockchain Voting System</p>
+   
+      <div class="card1">
+        <img src="{% static 'responsibility.png' %}" height="200px" width="200px">
+        <p style="padding-left:28px"><b>Civic Responsibility</b></p>
+        
+      </div>
+      <div class="card2">
+        <img src="{% static 'ideas.png' %}" height="200px" width="190px">
+        <p style="padding-left:40px;"><b>Representation</b></p>
+
+      </div>
+      <div class="card3">
+        <img src="{% static 'accountability.png' %}" height="200px" width="190px">
+        <p style="padding-left:45px"><b>Accountability</b></p>
+      </div>
+
+       <form action="{% url 'electionlist'%}" method = "post" style="display:inline;">
+       {%csrf_token%}
+       <button type="submit" class="vote-btn">Vote Now</button>
+       </form>
+ </div>
+ </article>
+ 

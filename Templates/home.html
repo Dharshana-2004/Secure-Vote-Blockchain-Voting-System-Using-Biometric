@@ -1,0 +1,78 @@
+{% load static %}
+ <!doctype html>
+ <html lang="en">
+ <head>
+ <meta charset="utf-8">
+ <title>eVote · Home</title>
+ <link rel="stylesheet" href="{% static 'css/home.css' %}">
+ </head>
+ <body class="home">
+
+ <!-- Pill Navbar -->
+ <nav class="navbar glass">
+ <div class="nav-left">
+ <div class="nav-logo">
+ eVote
+ <span class="badge">secure · on-chain</span>
+ </div>
+ </div>
+ <div class="nav-right">
+ <button class="nav-btn secondary">How it works</button>
+ <button class="nav-btn">Sign out</button>
+ </div>
+ </nav>
+
+ <!-- Content -->
+ <main class="container">
+ <div class="section-head">
+ <div>
+ <h2>Ongoing elections</h2>
+ <p>Cast your vote securely on the blockchain.</p>
+ </div>
+ </div>
+
+ <section class="elections">
+ <!-- Card 1 -->
+ <article class="card glass">
+ <div class="meta">
+ <span class="tag">Public</span>
+ </div>
+ <h3 class="title">Student Council 2025</h3>
+ <p class="subtitle">Closes in 3 days · 4 candidates</p>
+ <div class="actions">
+ <a href="" class="btn">Vote now</a>
+ <a href="#" class="btn alt">Details</a>
+ </div>
+ </article>
+
+ <!-- Duplicate / loop over your queryset -->
+ <article class="card glass">
+ <div class="meta">
+ <span class="tag">Internal</span>
+ </div>
+ <h3 class="title">Tech Committee</h3>
+ <p class="subtitle">Closes tomorrow · 3 candidates</p>
+ <div class="actions">
+ <a href="" class="btn">Vote now</a>
+ <a href="#" class="btn alt">Details</a>
+ </div>
+ </article>
+
+ <!-- ...render more with a Django for-loop -->
+ 
+ {% for election in elections %}
+ <article class="card glass">
+ <div class="meta"><span class="tag">{{ election.scope }}</span></div>
+ <h3 class="title">{{ election.title }}</h3>
+ <p class="subtitle">Closes {{ election.ends|timesince }} · {{ election.candidates.count }} candidates</p>
+ <div class="actions">
+ <a href="{% url 'ballot' election.id %}" class="btn">Vote now</a>
+ <a href="{% url 'election_detail' election.id %}" class="btn alt">Details</a>
+ </div>
+ </article>
+ {% endfor %}
+ 
+ </section>
+ </main>
+ </body>
+ </html>
